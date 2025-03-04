@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.zp</groupId>
-    <artifactId>SpringBootLearn</artifactId>
+    <artifactId>spring-boot-learn</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -14,22 +14,39 @@
     </description>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>21</java.version>
+        <spring-boot.version>3.3.0</spring-boot.version>
     </properties>
     <modules>
+        <module>07-graph-springboot</module>
+        <module>08-template-engine-springboot</module>
         <!-- <module>01-springboot-basic-configuration</module>
         <module>18-spring-boot-mybatis-xml</module>
         <module>40-third-config-import-bean</module>
         <module>43-activiti-spring-boot</module> -->
-        <module>39-spring-boot-minio</module>
-        <module>46-dubbo-spring-boot-demo</module>
-        <module>47-rabbitmq-spring-boot</module>
-        <module>48-ratelimiter-spring-boot</module>
-        <module>49-thread-pool-spring-boot</module>
-        <module>50-spring-security-learn</module>
-        <module>51-springboot-websocket</module>
+        <!-- <module>28-junit-springboot</module> -->
+        <!-- <module>28-springboot-junit</module> -->
+        <!-- <module>39-spring-boot-minio</module> -->
+        <!-- <module>46-dubbo-spring-boot-demo</module> -->
+        <!-- <module>47-rabbitmq-spring-boot</module> -->
+        <!-- <module>48-ratelimiter-spring-boot</module> -->
+        <!-- <module>49-thread-pool-spring-boot</module> -->
+        <!-- <module>50-spring-security-learn</module> -->
+        <!-- <module>51-springboot-websocket</module> -->
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
     <!-- <dependencies>
         &lt;!&ndash;        web功能起步坐标&ndash;&gt;
         <dependency>
