@@ -1,6 +1,9 @@
 datasource:
   url: localhost:3306/springboot-learn
 spring:
+  mvc:
+    async:
+      request-timeout: -1
   datasource:
     url: jdbc:mysql://${datasource.url}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
     username: root

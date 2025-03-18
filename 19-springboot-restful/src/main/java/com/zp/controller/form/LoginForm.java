@@ -1,8 +1,8 @@
 package com.zp.controller.form;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 
 /**
  * LoginForm

@@ -3,6 +3,7 @@ package com.zp.controller;
 import com.zp.pojo.City;
 import com.zp.response.ApiResult;
 import com.zp.service.CityService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +11,7 @@ import java.util.List;
 
 @RestController
 public class CityRestController {
-    @Autowired
+    @Resource
     private CityService cityService;
 
     @GetMapping(value = "/api/city/{id}")
