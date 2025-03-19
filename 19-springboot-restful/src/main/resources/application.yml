@@ -4,6 +4,11 @@ spring:
   mvc:
     async:
       request-timeout: -1
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+
   datasource:
     url: jdbc:mysql://${datasource.url}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
     username: root
@@ -15,3 +20,7 @@ mybatis:
   type-aliases-package: com.zp.pojo
   configuration:
     map-underscore-to-camel-case: true  # 开启驼峰命名规范
+
+logging:
+  level:
+    org.springframework.web.servlet.view: debug

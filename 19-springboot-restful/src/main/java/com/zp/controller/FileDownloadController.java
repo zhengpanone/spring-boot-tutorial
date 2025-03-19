@@ -2,11 +2,16 @@ package com.zp.controller;
 
 import com.zp.pojo.City;
 import com.zp.service.CityService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
@@ -15,8 +20,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author : zhengpanone
@@ -24,6 +34,7 @@ import java.util.Random;
  * Version : v1.0.0
  * Description:
  */
+@Slf4j
 @RestController
 public class FileDownloadController {
 
@@ -69,13 +80,14 @@ public class FileDownloadController {
 
     /**
      * 推送实时生成的动态数据（如日志、股票价格、传感器数据）
+     *
      * @return
      */
     @GetMapping("/stream/logs")
-    public ResponseEntity<StreamingResponseBody> streamLogs(){
+    public ResponseEntity<StreamingResponseBody> streamLogs() {
         StreamingResponseBody responseBody = outputStream -> {
-            for(int i = 0; i < 20; i++){
-                String log = "日志数据"+i+"-"+ LocalDateTime.now()+"\n";
+            for (int i = 0; i < 20; i++) {
+                String log = "日志数据" + i + "-" + LocalDateTime.now() + "\n";
                 outputStream.write(log.getBytes(StandardCharsets.UTF_8));
                 outputStream.flush();
                 // 模拟延迟
@@ -93,11 +105,11 @@ public class FileDownloadController {
     }
 
     @GetMapping("/export/users")
-    public ResponseEntity<StreamingResponseBody> exportCsv(){
+    public ResponseEntity<StreamingResponseBody> exportCsv() {
         StreamingResponseBody responseBody = outputStream -> {
             // 写入CSV头部
             outputStream.write("Id,Name,Email\n".getBytes());
-            for (int i = 1; i <= 10; i++){
+            for (int i = 1; i <= 10; i++) {
                 //List<City> allCity = cityService.findAllCity();
                 outputStream.write(String.format("%d,City%d,city%d@example.com\n", i, i, i).getBytes(StandardCharsets.UTF_8));
             }
@@ -109,4 +121,80 @@ public class FileDownloadController {
                 .header("Content-Disposition", "attachment; filename=data.csv")
                 .body(responseBody);
     }
+
+    @GetMapping("/bodyEmitter")
+    public ResponseBodyEmitter streamData() {
+        // 创建一个ResponseBodyEmitter，-1代表不超时
+        ResponseBodyEmitter emitter = new ResponseBodyEmitter(-1L);
+        // 异步执行耗时操作
+        CompletableFuture.runAsync(() -> {
+            // 模拟耗时操作
+            for (int i = 0; i < 10000; i++) {
+                try {
+                    // 发送数据
+                    emitter.send("数据bodyEmitter" + i + " @ " + LocalDateTime.now() + "\n");
+                    // 模拟延迟
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    emitter.completeWithError(e);
+                    break;
+                }
+            }
+            emitter.complete();
+        });
+        return emitter;
+    }
+
+
+    private static final Map<String, SseEmitter> EMITTER_MAP = new ConcurrentHashMap<>();
+
+    @GetMapping("/subSseEmitter/{userId}")
+    public SseEmitter sseEmitter(@PathVariable String userId) {
+        log.info("sseEmitter: {}", userId);
+        SseEmitter emitterTmp = new SseEmitter(-1L);
+        EMITTER_MAP.put(userId, emitterTmp);
+        CompletableFuture.runAsync(() -> {
+            try {
+                SseEmitter.SseEventBuilder event = SseEmitter.event()
+                        .data("sseEmitter" + userId + " @ " + LocalTime.now())
+                        .id(String.valueOf(userId))
+                        .name("sseEmitter");
+                emitterTmp.send(event);
+            } catch (Exception ex) {
+                emitterTmp.completeWithError(ex);
+            }
+        });
+        return emitterTmp;
+    }
+
+    @GetMapping("/sendSseMsg/{userId}")
+    public void sseEmitter(@PathVariable String userId, String msg) throws IOException {
+        SseEmitter sseEmitter = EMITTER_MAP.get(userId);
+        if (sseEmitter == null) {
+            return;
+        }
+        sseEmitter.send(msg);
+    }
+
+    @GetMapping("/streamingResponse")
+    public ResponseEntity<StreamingResponseBody> handleRbe() {
+
+        StreamingResponseBody stream = out -> {
+            String message = "streamingResponse";
+            for (int i = 0; i < 1000; i++) {
+                try {
+                    out.write(((message + i) + "\r\n").getBytes());
+                    out.write("\r\n".getBytes());
+                    //调用一次flush就会像前端写入一次数据
+                    out.flush();
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(stream);
+    }
+
+    // https://www.cnblogs.com/chengxy-nds/p/18464734
 }
