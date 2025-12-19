@@ -34,6 +34,7 @@
         <!-- <module>49-thread-pool-spring-boot</module> -->
         <!-- <module>50-spring-security-learn</module> -->
         <!-- <module>51-springboot-websocket</module> -->
+        <module>56-milvus-deeplearning4j-springboot</module>
     </modules>
 
     <dependencyManagement>

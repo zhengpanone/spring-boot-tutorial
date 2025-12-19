@@ -12,6 +12,7 @@
     <groupId>com.zp</groupId>
     <artifactId>thymeleaf-springboot</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <description>https://www.cnblogs.com/gzhjj/p/13600911.html</description>
 
     <packaging>jar</packaging>
 

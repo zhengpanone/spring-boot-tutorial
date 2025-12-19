@@ -1,0 +1,10 @@
+server:
+  port: 8888
+
+rsa:
+  encrypt:
+    open: fasle # ??????
+    showLog: true # ??????log
+    publicKey: # RSA ??
+    privateKey: # RSA ??
+
