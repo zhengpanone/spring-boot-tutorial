@@ -1,0 +1,27 @@
+spring:
+  data:
+    redis:
+      # Redis服务器地址（单节点）
+      host: localhost
+      port: 30379
+      password: redis123456
+      database: 0
+
+      #哨兵模式
+#      sentinel:
+#        master: mymaster
+#        nodes: 127.0.0.1:26379,127.0.0.2:26379,127.0.0.3:26379
+#        password: yourpassword
+#        database: 0
+        #集群模式
+
+#      cluster:
+#        nodes: 127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
+#        max-redirects: 3
+#        password: yourpassword
+
+# Redisson 特定配置（可选）
+redisson:
+  # 线程池数量
+  connection-pool-size: 64
+  connection-minimum-idle-size: 10
