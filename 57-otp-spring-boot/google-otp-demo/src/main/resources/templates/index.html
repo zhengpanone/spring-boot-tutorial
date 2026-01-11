@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <title>Google Authenticator 验证系统</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 自定义样式 -->
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gradient-primary: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            --gradient-success: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .auth-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .auth-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .auth-body {
+            padding: 40px;
+        }
+
+        .input-group-custom {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .input-group-custom .input-group-text {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 50px;
+            justify-content: center;
+        }
+
+        .input-group-custom .form-control {
+            border: 2px solid #e1e5eb;
+            border-left: none;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        .input-group-custom .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-custom {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
+
+        .btn-custom:active {
+            transform: translateY(0);
+        }
+
+        .btn-success-custom {
+            background: var(--gradient-success);
+        }
+
+        .btn-success-custom:hover {
+            box-shadow: 0 10px 20px rgba(76, 201, 240, 0.3);
+        }
+
+        .qr-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            border: 2px dashed #dee2e6;
+        }
+
+        .qr-image {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .step-container:before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .step.active .step-icon {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .step-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .step.active .step-text {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-body {
+                padding: 20px;
+            }
+
+            .step-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .step-container:before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+    <!-- 主卡片 -->
+    <div class="auth-card">
+        <!-- 头部 -->
+        <div class="auth-header">
+            <i class="fas fa-shield-alt auth-icon"></i>
+            <h1>Google Authenticator 验证</h1>
+            <p class="mb-0">双重身份验证系统</p>
+        </div>
+
+        <!-- 主体 -->
+        <div class="auth-body" id="authBody">
+            <!-- 步骤指示器 -->
+            <div class="step-container" id="stepIndicator">
+                <div class="step active">
+                    <div class="step-icon">1</div>
+                    <div class="step-text">生成绑定</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <div class="step-text">扫描二维码</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <div class="step-text">完成验证</div>
+                </div>
+            </div>
+
+            <!-- 第一步：生成二维码 -->
+            <div class="form-section" id="qrSection">
+                <h3 class="section-title">
+                    <i class="fas fa-qrcode me-2"></i>生成绑定二维码
+                </h3>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle me-2"></i>
+                    请输入您的用户名，系统将生成专属的Google Authenticator绑定二维码
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">用户名</label>
+                    <div class="input-group input-group-custom">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        <input type="text"
+                               class="form-control"
+                               name="username"
+                               id="username"
+                               value="projdk.com"
+                               placeholder="请输入用户名">
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="button"
+                            class="btn btn-custom px-4"
+                            onclick="getQrCode()"
+                            id="generateBtn">
+                        <i class="fas fa-qrcode me-2"></i>生成绑定二维码
+                    </button>
+                </div>
+
+                <!-- 加载动画 -->
+                <div class="loading" id="loadingQr">
+                    <div class="loading-spinner"></div>
+                    <p>正在生成二维码...</p>
+                </div>
+
+                <!-- 二维码显示区域 -->
+                <div class="qr-container" id="qrCode">
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-qrcode fa-3x"></i>
+                        <p class="mt-2">点击上方按钮生成二维码</p>
+                    </div>
+                </div>
+
+                <!-- 使用说明 -->
+                <div class="info-box">
+                    <h6><i class="fas fa-mobile-alt me-2"></i>如何使用：</h6>
+                    <ol class="mb-0">
+                        <li>在手机上安装Google Authenticator应用</li>
+                        <li>点击"生成绑定二维码"按钮</li>
+                        <li>使用应用扫描上方显示的二维码</li>
+                        <li>应用中将显示6位动态验证码</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 第二步：验证 -->
+            <div class="form-section" id="verifySection">
+                <h3 class="section-title">
+                    <i class="fas fa-check-circle me-2"></i>验证动态码
+                </h3>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">用户名</label>
+                        <div class="input-group input-group-custom">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            <input type="text"
+                                   class="form-control"
+                                   name="verifyUsername"
+                                   id="verifyUsername"
+                                   value="projdk.com"
+                                   placeholder="请输入用户名">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">验证码</label>
+                        <div class="input-group input-group-custom">
+                                <span class="input-group-text">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                            <input type="text"
+                                   class="form-control"
+                                   name="code"
+                                   id="code"
+                                   placeholder="输入6位动态验证码"
+                                   maxlength="6"
+                                   pattern="[0-9]*"
+                                   inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="button"
+                            class="btn btn-success-custom px-4"
+                            onclick="verify()"
+                            id="verifyBtn">
+                        <i class="fas fa-check me-2"></i>验证动态码
+                    </button>
+                </div>
+
+                <!-- 加载动画 -->
+                <div class="loading" id="loadingVerify">
+                    <div class="loading-spinner"></div>
+                    <p>正在验证...</p>
+                </div>
+            </div>
+
+            <!-- 验证成功消息 -->
+            <div class="success-message" id="successMessage" style="display: none;">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>验证成功！</h3>
+                <p>即将跳转到仪表板页面...</p>
+                <div class="countdown" id="countdown">5</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚信息 -->
+    <div class="text-center text-white mt-4">
+        <p class="mb-1">
+            <i class="fas fa-shield-alt me-2"></i>Google Authenticator 验证系统
+        </p>
+        <p class="mb-0 small opacity-75">
+            确保您的账户安全，启用双重身份验证
+        </p>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 自定义脚本 -->
+<script>
+    // 生成二维码
+    function getQrCode() {
+        const username = $("#username").val().trim();
+
+        if (!username) {
+            showMessage('请输入用户名', 'error');
+            return;
+        }
+
+        // 显示加载动画
+        $('#loadingQr').show();
+        $('#generateBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>生成中...');
+
+        $.ajax({
+            url: "/getQrCode",
+            data: { username: username },
+            success: function (data) {
+                $('#loadingQr').hide();
+                $('#generateBtn').prop('disabled', false).html('<i class="fas fa-qrcode me-2"></i>生成绑定二维码');
+
+                if (data) {
+                    $('#qrCode').html(`
+                            <h5 class="mb-3">
+                                <i class="fas fa-qrcode me-2"></i>扫描绑定二维码
+                            </h5>
+                            <img src="${data}" class="qr-image mb-3" alt="QR Code">
+                            <p class="text-muted small mb-0">
+                                使用Google Authenticator应用扫描此二维码
+                            </p>
+                        `);
+
+                    // 更新步骤指示器
+                    updateStepIndicator(1);
+                    // 同步用户名
+                    $('#verifyUsername').val(username);
+                } else {
+                    showMessage('生成二维码失败，请重试', 'error');
+                }
+            },
+            error: function () {
+                $('#loadingQr').hide();
+                $('#generateBtn').prop('disabled', false).html('<i class="fas fa-qrcode me-2"></i>生成绑定二维码');
+                showMessage('请求失败，请检查网络连接', 'error');
+            }
+        });
+    }
+
+    // 验证动态码
+    function verify() {
+        const username = $("#verifyUsername").val().trim();
+        const code = $("#code").val().trim();
+
+        if (!username) {
+            showMessage('请输入用户名', 'error');
+            return;
+        }
+
+        if (!code || !/^\d{6}$/.test(code)) {
+            showMessage('请输入有效的6位验证码', 'error');
+            return;
+        }
+
+        // 显示加载动画
+        $('#loadingVerify').show();
+        $('#verifyBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>验证中...');
+
+        $.ajax({
+            url: "/verify",
+            data: {
+                username: username,
+                code: code
+            },
+            success: function (data) {
+                $('#loadingVerify').hide();
+                $('#verifyBtn').prop('disabled', false).html('<i class="fas fa-check me-2"></i>验证动态码');
+
+                if (data && typeof data === 'string') {
+                    if (data.toLowerCase().includes('成功') || data.toLowerCase().includes('success')) {
+                        // 验证成功，显示成功消息并跳转
+                        showSuccessAndRedirect(username);
+                    } else {
+                        showMessage(data, 'error');
+                    }
+                } else {
+                    showMessage('验证失败，请重试', 'error');
+                }
+            },
+            error: function () {
+                $('#loadingVerify').hide();
+                $('#verifyBtn').prop('disabled', false).html('<i class="fas fa-check me-2"></i>验证动态码');
+                showMessage('请求失败，请检查网络连接', 'error');
+            }
+        });
+    }
+
+    // 显示成功消息并跳转
+    function showSuccessAndRedirect(username) {
+        // 隐藏表单部分
+        $('#qrSection').hide();
+        $('#verifySection').hide();
+        $('#stepIndicator').hide();
+
+        // 显示成功消息
+        $('#successMessage').show();
+
+        // 更新步骤指示器
+        updateStepIndicator(2);
+
+        // 倒计时跳转
+        let countdown = 5;
+        const countdownElement = $('#countdown');
+        countdownElement.text(countdown);
+
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.text(countdown);
+
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                // 跳转到dashboard页面
+                window.location.href = '/dashboard?username=' + encodeURIComponent(username);
+            }
+        }, 1000);
+    }
+
+    // 显示消息
+    function showMessage(message, type) {
+        // 创建消息元素
+        const messageId = 'message-' + Date.now();
+        const messageClass = type === 'success' ? 'alert alert-success' : 'alert alert-danger';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        const messageHtml = `
+                <div id="${messageId}" class="${messageClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${icon} me-2"></i>${message}
+                    <button type="button" class="btn-close" onclick="$('#${messageId}').alert('close')"></button>
+                </div>
+            `;
+
+        // 插入到表单区域上方
+        $('#authBody').prepend(messageHtml);
+
+        // 5秒后自动消失
+        setTimeout(() => {
+            $(`#${messageId}`).alert('close');
+        }, 5000);
+    }
+
+    // 更新步骤指示器
+    function updateStepIndicator(stepIndex) {
+        $('.step').removeClass('active');
+        $(`.step`).eq(stepIndex).addClass('active');
+    }
+
+    // 页面加载时初始化
+    $(document).ready(function() {
+        // 输入框焦点效果
+        $('input').on('focus', function() {
+            $(this).closest('.input-group-custom').find('.form-control').addClass('focus');
+        }).on('blur', function() {
+            $(this).closest('.input-group-custom').find('.form-control').removeClass('focus');
+        });
+
+        // 验证码输入框自动跳转
+        $('#code').on('input', function(e) {
+            const value = $(this).val();
+            if (value.length === 6) {
+                verify();
+            }
+        });
+
+        // 用户名同步
+        $('#username').on('change', function() {
+            $('#verifyUsername').val($(this).val());
+        });
+
+        // 回车键触发验证
+        $('#code').on('keypress', function(e) {
+            if (e.which === 13) { // Enter键
+                verify();
+            }
+        });
+    });
+</script>
+</body>
+</html>
