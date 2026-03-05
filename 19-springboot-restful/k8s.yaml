@@ -1,0 +1,89 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-spring
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-restful-service
+  namespace: demo-spring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springboot-restful-service
+  template:
+    metadata:
+      labels:
+        app: springboot-restful-service
+    spec:
+      containers:
+        - name: springboot-restful-service
+          image: localhost:32000/springboot-restful-service:1.0.0
+          imagePullPolicy: Always # IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-restful-service
+  namespace: demo-spring
+spec:
+  selector:
+    app: springboot-restful-service
+  ports:
+    - port: 81
+      targetPort: 8080
+---
+# Gateway
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: demo-gateway
+  namespace: demo-spring
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      port: 81
+      protocol: HTTP
+---
+# HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: spring-restful-service-route
+  namespace: demo-spring
+spec:
+  parentRefs:
+    - name: demo-gateway
+  hostnames:
+    - api.localtest.me
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: springboot-restful-service
+          port: 81

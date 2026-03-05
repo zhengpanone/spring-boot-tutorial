@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-restful-service
+  namespace: demo-spring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springboot-restful-service
+  template:
+    metadata:
+      labels:
+        app: springboot-restful-service
+    spec:
+      containers:
+        - name: springboot-restful-service
+          image: localhost:32000/springboot-restful-service:1.0.0
+          imagePullPolicy: Always # IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
