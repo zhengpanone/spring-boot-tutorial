@@ -37,6 +37,7 @@
         <!-- <module>51-springboot-websocket</module> -->
         <module>52-sign-spring-boot</module>
         <module>56-milvus-deeplearning4j-springboot</module>
+        <module>57-otp-spring-boot</module>
     </modules>
 
     <dependencyManagement>
