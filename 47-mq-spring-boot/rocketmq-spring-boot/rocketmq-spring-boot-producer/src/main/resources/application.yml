@@ -1,0 +1,13 @@
+server:
+  port: 8081
+rocketmq:
+#  name-server: rocketmq-nameserver-svc:9876
+  name-server: 127.0.0.1:30976
+  producer:
+    group: demo-producer-group
+  consumer:
+    group: TestGroup
+
+
+
+

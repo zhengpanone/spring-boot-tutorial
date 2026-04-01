@@ -30,7 +30,7 @@
         <!-- <module>28-springboot-junit</module> -->
         <!-- <module>39-spring-boot-minio</module> -->
         <!-- <module>46-dubbo-spring-boot-demo</module> -->
-        <!-- <module>47-rabbitmq-spring-boot</module> -->
+         <module>47-mq-spring-boot</module>
         <!-- <module>48-ratelimiter-spring-boot</module> -->
         <!-- <module>49-thread-pool-spring-boot</module> -->
         <!-- <module>50-spring-security-learn</module> -->
