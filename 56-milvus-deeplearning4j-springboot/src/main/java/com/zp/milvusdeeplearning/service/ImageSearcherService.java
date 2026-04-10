@@ -7,6 +7,7 @@ import io.milvus.grpc.SearchResultData;
 import io.milvus.grpc.SearchResults;
 import io.milvus.param.MetricType;
 import io.milvus.param.R;
+import io.milvus.param.collection.LoadCollectionParam;
 import io.milvus.param.dml.SearchParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,11 @@ public class ImageSearcherService {
 
     private final MilvusClient milvusClient;
 
-    public ImageSearcherService(MilvusClient milvusClient) {
+    private final MilvusService milvusService;
+
+    public ImageSearcherService(MilvusClient milvusClient, MilvusService milvusService) {
         this.milvusClient = milvusClient;
+        this.milvusService = milvusService;
     }
 
     public List<Long> searchImage(List<Float> featureList, String collectionName, String fieldName) {
@@ -46,7 +50,7 @@ public class ImageSearcherService {
                 .withVectorFieldName(fieldName)
                 .withFloatVectors(vectors)
                 .build();
-
+        milvusService.load(collectionName);
         // 3. 执行搜索: 使用 milvusClient 的 search 方法执行搜索，并将结果存储在 searchResults 中。
         R<SearchResults> search = milvusClient.search(searchParam);
         List<Long> arrayList = new ArrayList<>();

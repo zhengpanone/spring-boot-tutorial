@@ -8,10 +8,7 @@ import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
-import io.milvus.param.collection.CollectionSchemaParam;
-import io.milvus.param.collection.CreateCollectionParam;
-import io.milvus.param.collection.FieldType;
-import io.milvus.param.collection.FlushParam;
+import io.milvus.param.collection.*;
 import io.milvus.param.dml.InsertParam;
 import io.milvus.param.index.CreateIndexParam;
 import io.milvus.v2.service.collection.request.CreateCollectionReq;
@@ -71,6 +68,7 @@ public class MilvusService {
                 .withSchema(schemaParam)
                 .build();
         R<RpcStatus> result = milvusClient.createCollection(param);
+        buildIndex(collectionName);
         log.info(result.toString());
     }
 
@@ -102,7 +100,6 @@ public class MilvusService {
         IDs iDs = insert.getData().getIDs();
 
         flush(collectionName);
-        buildIndex(collectionName);
     }
 
     public void flush(String collectionName) {
@@ -112,6 +109,14 @@ public class MilvusService {
                 .withSyncFlushWaitingInterval(50L)
                 .withSyncFlushWaitingTimeout(30L)
                 .build());
+    }
+
+    public void load(String collectionName) {
+        milvusClient.loadCollection(
+                LoadCollectionParam.newBuilder()
+                        .withCollectionName(collectionName)
+                        .build()
+        );
     }
 
     public void buildIndex(String collectionName) {

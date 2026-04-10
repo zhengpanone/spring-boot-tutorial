@@ -18,7 +18,7 @@ public class MilvusConfig {
 
     @Value("${milvus.host:127.0.0.1}")
     private String host;
-    @Value("${port:19530}")
+    @Value("${milvus.port:19530}")
     private int port;
 
     @Bean
@@ -26,7 +26,7 @@ public class MilvusConfig {
         ConnectParam connectParam = ConnectParam.newBuilder()
                 .withHost(host)
                 .withPort(port)
-                .withAuthorization("root", "Milvus")
+//                .withAuthorization("root", "Milvus")
                 .build();
         MilvusServiceClient milvusServiceClient = new MilvusServiceClient(connectParam);
         return milvusServiceClient;

@@ -47,11 +47,11 @@ public class ImageSearchController {
             imageFile.transferTo(file);
             indArray = featureExtractor.extractFeatures(file);
             List<Float> featureList = Convert.convertToFloatArray(indArray);
-            List<List<Float>> vectors = Arrays.asList(featureList);
-            List<Long> objects = imageSearcherService.searchImage(featureList, "image_collection", "embedding");
-            if(CollectionUtils.isEmpty(objects)){
-
-            }
+//            List<List<Float>> vectors = Arrays.asList(featureList);
+//            List<Long> objects = imageSearcherService.searchImage(featureList, "image_collection", "embedding");
+//            if(CollectionUtils.isEmpty(objects)){
+//
+//            }
             // 将图像特征向量存储到 Milvus
             milvusService.insertData(featureList, "image_collection", "embedding");
         } catch (IOException e) {
