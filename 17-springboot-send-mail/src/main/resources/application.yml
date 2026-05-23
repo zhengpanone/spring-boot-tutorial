@@ -1,0 +1,16 @@
+spring:
+  # 邮箱配置
+  mail:
+    host: smtp.163.com
+    username: zhengpanone
+    password: 15527300572
+    properties:
+      from: zhengpanone@163.com # 邮件发件人
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/views/
+  servlet:
+    multipart:
+      max-file-size: 10MB #限制单个文件大小
+      max-request-size: 50MB #限制请求总量

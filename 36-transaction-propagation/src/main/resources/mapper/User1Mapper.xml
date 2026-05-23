@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zp.dao.User1Mapper">
+
+<insert id="insert" parameterType="com.zp.pojo.User1">
+    insert into user1 (id, name) values (#{user1.id, user1.name})
+</insert>
+
+    <select id="selectByPrimaryKey" resultType="com.zp.pojo.User1">
+        select * from user1 u1 where u1.id = #{id}
+    </select>
+
+
+
+
+</mapper>

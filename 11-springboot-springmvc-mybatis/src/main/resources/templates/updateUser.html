@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title> 更新用户</title>
+</head>
+<body>
+<form th:action="@{/user/updateUser}" method="post">
+    <input type="hidden" name="id" th:field="${user.id}"><br>
+    用户名：<input type="text" name="name" th:field="${user.name}"><br>
+    年龄：<input type="text" name="age" th:field="${user.age}"><br>
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div>
+    域对象操作
+    <br>
+    Request:<span th:text="${#httpServletRequest.getAttribute('req')}"></span>
+    <br>
+    Session:<span th:text="${session.sess}"></span>
+    <br>
+    Application:<span th:text="${application.app}"></span>
+
+</div>
+</body>
+</html>
